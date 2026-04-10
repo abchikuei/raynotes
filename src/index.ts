@@ -65,6 +65,10 @@ export default async function main() {
 			throw new Error("OpenAI returned an empty response.");
 		}
 
+		const lines = polishedText.trim().split("\n");
+		const tag = lines[0].startsWith("#") ? lines[0].trim() : "#GF";
+		const contentWithoutTag = lines.slice(1).join("\n").trim();
+
 		const now = new Date();
 		const dateHeader = now.toLocaleDateString("en-GB", {
 			day: "numeric",
@@ -73,7 +77,7 @@ export default async function main() {
 			weekday: "long",
 		});
 
-		const finalEntry = `\n\n---\n## ${dateHeader}\n\n${polishedText.trim()}\n`;
+		const finalEntry = `\n\n---\n## ${dateHeader} ${tag}\n\n${contentWithoutTag}\n`;
 
 		fs.appendFileSync(preferences.obsidianPath, finalEntry);
 		fs.writeFileSync(preferences.rawNotesPath, "");
