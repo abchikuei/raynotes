@@ -82,7 +82,6 @@ export default async function main() {
 		}
 
 		fs.appendFileSync(vaultPath, finalEntry);
-		fs.writeFileSync(rawPath, "");
 
 		toast.style = Toast.Style.Success;
 		toast.title = "Synced Successfully!";
