@@ -1,98 +1,95 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import axios from "axios";
 import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { OpenAI } from "openai";
 
 interface Preferences {
 	rawNotesPath: string;
 	obsidianPath: string;
 	openaiApiKey: string;
-	customPrompt: string;
+	prompt: string;
+}
+
+function resolvePath(filePath: string): string {
+	if (filePath.startsWith("~")) {
+		return path.join(os.homedir(), filePath.slice(1));
+	}
+	return path.resolve(filePath);
 }
 
 export default async function main() {
 	const preferences = getPreferenceValues<Preferences>();
-	const url = "https://api.openai.com/v1/chat/completions";
+	const openai = new OpenAI({ apiKey: preferences.openaiApiKey });
+
+	const rawPath = resolvePath(preferences.rawNotesPath);
+	const vaultPath = resolvePath(preferences.obsidianPath);
+
+	const toast = await showToast({
+		style: Toast.Style.Animated,
+		title: "Conspect is running",
+		message: "Checking files...",
+	});
+
 	try {
-		if (!fs.existsSync(preferences.rawNotesPath)) {
-			await showToast(
-				Toast.Style.Failure,
-				"File Error",
-				"Raw notes file not found at the specified path.",
-			);
+		if (!fs.existsSync(rawPath)) {
+			throw new Error(`Raw notes file not found: ${rawPath}`);
+		}
+
+		const rawContent = fs.readFileSync(rawPath, "utf-8").trim();
+
+		if (!rawContent) {
+			toast.style = Toast.Style.Failure;
+			toast.title = "Empty Note";
+			toast.message = "Please write something in your scratchpad first.";
 			return;
 		}
 
-		const rawContent = fs.readFileSync(preferences.rawNotesPath, "utf-8");
+		toast.title = "AI is polishing...";
+		toast.message = "Structuring and translating";
 
-		if (!rawContent.trim()) {
-			await showToast(
-				Toast.Style.Failure,
-				"Empty Note",
-				"The raw notes file is empty. Write something first!",
-			);
-			return;
-		}
+		const prompt = `${preferences.prompt}\n\n---\n\nRaw note:\n\n${rawContent}`;
 
-		const toast = await showToast(
-			Toast.Style.Animated,
-			"ChatGPT is polishing...",
-			"Processing your thoughts",
-		);
-		const response = await axios.post(
-			url,
-			{
-				model: "gpt-5.4-nano",
-				messages: [
-					{ role: "system", content: preferences.customPrompt },
-					{
-						role: "user",
-						content: `Raw note content:\n${rawContent}`,
-					},
-				],
-				temperature: 0.3,
-			},
-			{
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${preferences.openaiApiKey}`,
-				},
-			},
-		);
+		const response = await openai.chat.completions.create({
+			model: "gpt-5-nano",
+			messages: [{ role: "user", content: prompt }],
+		});
 
-		const polishedText = response.data.choices[0]?.message?.content;
+		const polishedText = response.choices[0]?.message?.content?.trim();
 
 		if (!polishedText) {
 			throw new Error("OpenAI returned an empty response.");
 		}
 
-		const lines = polishedText.trim().split("\n");
-		const tag = lines[0].trim();
+		const lines = polishedText.split("\n");
 		const mainContent = lines.slice(1).join("\n").trim();
 
 		const now = new Date();
-		const dateHeader = now.toLocaleDateString("en-GB", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-			weekday: "long",
-		});
+		const dateHeader = now
+			.toLocaleDateString("en-US", {
+				weekday: "long",
+				month: "long",
+				day: "numeric",
+				year: "numeric",
+			})
+			.replace(/,/g, "");
 
-		const finalEntry = `\n\n---\n## ${dateHeader} | ${tag}\n\n${mainContent}\n`;
+		const finalEntry = `\n\n---\n## ${dateHeader}\n\n${mainContent}\n`;
 
-		fs.appendFileSync(preferences.obsidianPath, finalEntry);
-		fs.writeFileSync(preferences.rawNotesPath, "");
+		const destDir = path.dirname(vaultPath);
+		if (!fs.existsSync(destDir)) {
+			fs.mkdirSync(destDir, { recursive: true });
+		}
+
+		fs.appendFileSync(vaultPath, finalEntry);
+		fs.writeFileSync(rawPath, "");
 
 		toast.style = Toast.Style.Success;
-		toast.title = "Successfully Synced!";
-		toast.message = "Note polished and archived.";
+		toast.title = "Synced Successfully!";
+		toast.message = `Check your Obsidian Notes`;
 	} catch (error) {
-		let errorMessage = "An unexpected error occurred";
-		if (axios.isAxiosError(error)) {
-			errorMessage =
-				error.response?.data?.error?.message || error.message;
-		} else if (error instanceof Error) {
-			errorMessage = error.message;
-		}
-		await showToast(Toast.Style.Failure, "Critical Error", errorMessage);
+		toast.style = Toast.Style.Failure;
+		toast.title = "Operation Failed";
+		toast.message = error instanceof Error ? error.message : String(error);
 	}
 }

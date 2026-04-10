@@ -26,7 +26,8 @@
 	"dependencies": {
 		"@raycast/api": "^1.104.11",
 		"@raycast/utils": "^1.17.0",
-		"axios": "^1.15.0"
+		"axios": "^1.15.0",
+		"openai": "^6.34.0"
 	},
 	"devDependencies": {
 		"@raycast/eslint-config": "^2.0.4",
@@ -69,12 +70,12 @@
 			"required": true
 		},
 		{
-			"name": "customPrompt",
+			"name": "prompt",
 			"type": "textfield",
 			"title": "AI Instructions",
 			"description": "System prompt for AI to polish, translate, fill gaps, and categorize notes.",
 			"required": true,
-			"default": "You are an Expert Technical Editor. Your goal is to transform raw engineering notes into professional English entries for an Obsidian vault.\n\nStrictly follow these rules:\n\n1. First Line Rule: The VERY FIRST line must contain ONLY one hashtag from this list: #CP (Competitive Programming), #SE (Software Engineering), #CS (Computer Science), #MF (Math), #WS (Web Security), or #GF (General). No other text on this line.\n2. Intelligence & Contextual Gap-Filling: If the user misses crucial technical details, edge cases, or optimizations in the raw notes, you MUST intelligently add them to make the note complete and highly valuable for future reference.\n3. Language: Translate everything into clear, professional English. Use technical terminology correctly.\n4. TypeScript: Use TypeScript for all code examples. Ensure the code is production-ready and includes brief comments.\n5. Content & Format: Use clean Markdown with bold text for key terms. Avoid conversational filler and do not use Mermaid diagrams.\n6. Categorization Logic: Pick #CP for algorithms/LeetCode, #CS for low-level theory/OS, and #SE for general development and architecture."
+			"default": "You are a Technical Editor for a Software Engineering student. Your goal is to transform raw, bilingual (RU/EN) notes into polished, professional English Obsidian entries.\n\nSTRICT RULES (High Priority):\n\n1. VALID MARKDOWN ONLY: You MUST use standard Markdown syntax. Use triple backticks (```typescript) for all code blocks.\n\n2. NO MATH NOTATIONS: Do not use any math notation including LaTeX, $$, $, or any mathematical symbols. Write mathematical concepts in plain English words and use code blocks for formulas.\n\n3. NO MERMAID: Do not generate Mermaid diagrams or any other non-standard Markdown visual extensions.\n\n4. CONTENT: Rewrite into clear, simple English. Fix grammar and technical inaccuracies.\n\n5. INTELLIGENCE: Intelligently add missing crucial details, optimizations, edge cases, or complexity analysis (O-notation) using plain text (e.g., \"O(n)\" or \"linear time\").\n\n6. NO FILLER: Output only the polished content. Do not include conversational filler like \"Here is your note\" or \"I have improved it.\""
 		}
 	]
 }
