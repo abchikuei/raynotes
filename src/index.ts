@@ -66,8 +66,8 @@ export default async function main() {
 		}
 
 		const lines = polishedText.trim().split("\n");
-		const tag = lines[0].startsWith("#") ? lines[0].trim() : "#GF";
-		const contentWithoutTag = lines.slice(1).join("\n").trim();
+		const tag = lines[0].trim();
+		const mainContent = lines.slice(1).join("\n").trim();
 
 		const now = new Date();
 		const dateHeader = now.toLocaleDateString("en-GB", {
@@ -77,7 +77,7 @@ export default async function main() {
 			weekday: "long",
 		});
 
-		const finalEntry = `\n\n---\n## ${dateHeader} ${tag}\n\n${contentWithoutTag}\n`;
+		const finalEntry = `\n\n---\n## ${dateHeader} | ${tag}\n\n${mainContent}\n`;
 
 		fs.appendFileSync(preferences.obsidianPath, finalEntry);
 		fs.writeFileSync(preferences.rawNotesPath, "");
