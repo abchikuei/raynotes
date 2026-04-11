@@ -1,4 +1,10 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+	closeMainWindow,
+	getPreferenceValues,
+	showHUD,
+	showToast,
+	Toast,
+} from "@raycast/api";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -83,9 +89,8 @@ export default async function main() {
 
 		fs.appendFileSync(vaultPath, finalEntry);
 
-		toast.style = Toast.Style.Success;
-		toast.title = "Synced Successfully!";
-		toast.message = `Check your Obsidian Notes`;
+		await closeMainWindow();
+		await showHUD("Notes are polished and saved!");
 	} catch (error) {
 		toast.style = Toast.Style.Failure;
 		toast.title = "Operation Failed";
