@@ -10,6 +10,8 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { OpenAI } from "openai";
 
+import { DEFAULT_SYSTEM_PROMPT } from "./constants/prompt";
+
 interface Preferences {
 	rawNotesPath: string;
 	obsidianPath: string;
@@ -30,6 +32,7 @@ export default async function main() {
 
 	const rawPath = resolvePath(preferences.rawNotesPath);
 	const vaultPath = resolvePath(preferences.obsidianPath);
+	const systemPrompt = preferences.prompt ?? DEFAULT_SYSTEM_PROMPT;
 
 	const toast = await showToast({
 		style: Toast.Style.Animated,
@@ -54,11 +57,19 @@ export default async function main() {
 		toast.title = "AI is polishing...";
 		toast.message = "Structuring and translating";
 
-		const prompt = `${preferences.prompt}\n\n---\n\nRaw note:\n\n${rawContent}`;
-
 		const response = await openai.chat.completions.create({
-			model: "gpt-5-nano",
-			messages: [{ role: "user", content: prompt }],
+			model: "gpt-5.4-mini",
+			messages: [
+				{
+					role: "system",
+					content: systemPrompt,
+				},
+				{
+					role: "user",
+					content: `Here are the raw notes to polish:\n\n${rawContent}`,
+				},
+			],
+			temperature: 0.3,
 		});
 
 		const polishedText = response.choices[0]?.message?.content?.trim();
