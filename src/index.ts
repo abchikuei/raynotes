@@ -91,7 +91,7 @@ export default async function main() {
 			})
 			.replace(/,/g, "");
 
-		const finalEntry = `\n\n---\n## ${dateHeader}\n\n${mainContent}\n`;
+		const finalEntry = `\n\n---\n# ${dateHeader}\n\n${mainContent}\n`;
 
 		const destDir = path.dirname(vaultPath);
 		if (!fs.existsSync(destDir)) {
