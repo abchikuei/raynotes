@@ -82,16 +82,9 @@ export default async function main() {
 		const mainContent = lines.slice(1).join("\n").trim();
 
 		const now = new Date();
-		const dateHeader = now
-			.toLocaleDateString("en-US", {
-				weekday: "long",
-				month: "long",
-				day: "numeric",
-				year: "numeric",
-			})
-			.replace(/,/g, "");
+		const dateHeader = now.toLocaleDateString("en-GB").replace(/\//g, ".");
 
-		const finalEntry = `\n\n---\n# ${dateHeader}\n\n${mainContent}\n`;
+		const finalEntry = `\n\n---\n# \`${dateHeader}\`\n\n${mainContent}\n`;
 
 		const destDir = path.dirname(vaultPath);
 		if (!fs.existsSync(destDir)) {
