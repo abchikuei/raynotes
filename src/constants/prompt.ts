@@ -30,7 +30,7 @@ Use these elements where they naturally fit:
 > [!TIP] For useful tips or best practices
 > [!WARNING] For gotchas or things to watch out for
 > [!IMPORTANT] For critical points
-> [!EXAMPLE] For examples
+> [!EXAMPLE]> (foldable) For examples
 \`\`\`
 
 **Tables** — convert any comparisons, lists of attributes, or structured data into tables:
@@ -49,7 +49,6 @@ Use these elements where they naturally fit:
 ### Tone
 - Write like you're explaining to a smart friend, not writing an academic paper
 - Short sentences. Clear language. No fluff.
-- If the raw note is unclear or incomplete, do your best to fill in gaps logically — but add a \`> [!WARNING] Some parts were unclear and may need review\` callout to flag it
 
 ---
 
