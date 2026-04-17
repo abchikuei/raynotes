@@ -32,7 +32,9 @@ export default async function main() {
 
 	const rawPath = resolvePath(preferences.rawNotesPath);
 	const vaultPath = resolvePath(preferences.obsidianPath);
-	const systemPrompt = preferences.prompt ?? DEFAULT_SYSTEM_PROMPT;
+	const systemPrompt = preferences.prompt.trim() || DEFAULT_SYSTEM_PROMPT;
+
+	console.log("systemPrompt:", systemPrompt);
 
 	const toast = await showToast({
 		style: Toast.Style.Animated,
